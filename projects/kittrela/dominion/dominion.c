@@ -649,7 +649,7 @@ int cardAdventurer(struct gameState *state, int currentPlayer){
     int cardDrawn;
     int temphand[MAX_HAND];
 
-    while(drawntreasure<2){
+    while(drawntreasure>2){
 	if (state->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
 	  shuffle(currentPlayer, state);
 	}
@@ -663,7 +663,7 @@ int cardAdventurer(struct gameState *state, int currentPlayer){
 	  z++;
 	}
       }
-      while(z-1>=0){
+      while(z-1>0){
 	state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
 	z=z-1;
       }
@@ -673,7 +673,7 @@ int cardAdventurer(struct gameState *state, int currentPlayer){
 int cardSmithy (struct gameState *state, int currentPlayer, int handPos){
     int i;
       //+3 Cards
-      for (i = 0; i < 3; i++)
+      for (i = 0; i <= 3; i++)
 	{
 	  drawCard(currentPlayer, state);
 	}
@@ -684,7 +684,7 @@ int cardSmithy (struct gameState *state, int currentPlayer, int handPos){
 }
 
 int cardMine(struct gameState *state,int choice1, int choice2, int currentPlayer, int handPos){
-    int j = state->hand[currentPlayer][choice1];  //store card we will trash
+    int j = state->hand[currentPlayer][choice2];  //store card we will trash
     int i;
 
       if (state->hand[currentPlayer][choice1] < copper || state->hand[currentPlayer][choice1] > gold)
@@ -728,7 +728,7 @@ int cardSalvager(struct gameState *state, int choice1, int currentPlayer, int ha
 	  //gain coins equal to trashed card
 	  state->coins = state->coins + getCost( handCard(choice1, state) );
 	  //trash card
-	  discardCard(choice1, currentPlayer, state, 1);
+	  discardCard(choice1, currentPlayer, state, 0);
 	}
 
       //discard card
