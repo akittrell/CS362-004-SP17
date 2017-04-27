@@ -17,4 +17,4 @@ clean:
 	rm -f unittestresults.out
 	
 cleanall:
-	rm -f unittestresults.out unittest1 unittest2*.gcda *.gcno *.gcov
+	rm -f unittestresults.out unittest1 unittest2 *.gcda *.gcno *.gcov

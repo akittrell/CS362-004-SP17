@@ -2,7 +2,7 @@
 
 int assertTrue (int left, int right, char *curFunction){
     if(left == right){
-        printf("Assert Test Passed\n");
+        //printf("Assert Test Passed\n");
         return 1;
     }
     else{

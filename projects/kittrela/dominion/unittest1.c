@@ -24,6 +24,7 @@
 
 int main(){
     int i;
+    int passed;
     int seed = 100;
     int numPlayer = 2;
     int handCount;
@@ -40,6 +41,7 @@ int main(){
     G.whoseTurn = 0; //player 1 is going to be the test player here
 
     printf("---------| TEST 1: NOT ENOUGH MONEY TO PURCHASE |------------\n");
+    passed = 1;
         //replace all cards in hand with estates (ie, no coins)
     printf("Coin amount BEFORE estate replacement: %d\n", G.coins);
     for (i=0; i<G.handCount[0];i++){
@@ -51,15 +53,22 @@ int main(){
     memcpy(&testG, &G, sizeof(struct gameState));
 
     buyCard(adventurer, &G);
-    assertTrue(G.supplyCount[adventurer], testG.supplyCount[adventurer], "supplyCount");
-    assertTrue(G.handCount[0], testG.handCount[0], "handCount");
-    assertTrue(G.numActions, testG.numActions, "numActions");
-    assertTrue(G.numBuys, testG.numBuys, "numBuys");
+    passed *= assertTrue(G.supplyCount[adventurer], testG.supplyCount[adventurer], "supplyCount");
+    passed *= assertTrue(G.handCount[0], testG.handCount[0], "handCount");
+    passed *= assertTrue(G.numActions, testG.numActions, "numActions");
+    passed *= assertTrue(G.numBuys, testG.numBuys, "numBuys");
     for (i = 0; i < 5 ; i++){
-        assertTrue(G.hand[0][i], estate, "cards in hand");
+        passed *= assertTrue(G.hand[0][i], estate, "cards in hand");
     }
 
+    if(passed == 1){
+        printf("--------------| TEST SUCCESSFUL |-------------\n\n");
+    }
+    else{
+        printf("--------------| TEST FAILED |-------------\n\n");
+    }
     printf("---------| TEST 2: CARD CAN BE PURCHASED AND CARD SUPPLY > 0 |------------\n");
+    passed = 1;
     //replace all cards in player 1's hand with gold, so that they have enough to purchase desired card
     //for both test states
     for (i=0; i<G.handCount[0];i++){
@@ -70,14 +79,21 @@ int main(){
     updateCoins(0,&testG, 0);
     buyCard(adventurer, &G);
 
-    assertTrue(G.supplyCount[adventurer], ((testG.supplyCount[adventurer])-1), "supplyCount");
-    assertTrue(G.handCount[0], testG.handCount[0], "handCount");
-    assertTrue(G.numActions, testG.numActions, "numActions"); //should not change
-    assertTrue(G.numBuys, testG.numBuys-1, "numBuys");
-    assertTrue(G.discardCount[0], testG.discardCount[0]+1, "discardCount"); //bought card
-    assertTrue(G.coins, testG.coins-6, "coin amount"); //make sure 6 coins was taken from the current player
+    passed *= assertTrue(G.supplyCount[adventurer], ((testG.supplyCount[adventurer])-1), "supplyCount");
+    passed *= assertTrue(G.handCount[0], testG.handCount[0], "handCount");
+    passed *= assertTrue(G.numActions, testG.numActions, "numActions"); //should not change
+    passed *= assertTrue(G.numBuys, testG.numBuys-1, "numBuys");
+    passed *= assertTrue(G.discardCount[0], testG.discardCount[0]+1, "discardCount"); //bought card
+    passed *= assertTrue(G.coins, testG.coins-6, "coin amount"); //make sure 6 coins was taken from the current player
 
+    if(passed == 1){
+        printf("--------------| TEST SUCCESSFUL |-------------\n\n");
+    }
+    else{
+        printf("--------------| TEST FAILED |-------------\n\n");
+    }
     printf("---------| TEST 3: SUPPLY OF CARD = 0 |------------\n");
+    passed = 1;
     memcpy(&G, &testG, sizeof(struct gameState));
 
     //set supply to 0 for adventurer
@@ -93,12 +109,18 @@ int main(){
 
     buyCard(adventurer, &G);
     //no differences should be present between the two states
-    assertTrue(G.supplyCount[adventurer], ((testG.supplyCount[adventurer])), "supplyCount");
-    assertTrue(G.handCount[0], testG.handCount[0], "handCount");
-    assertTrue(G.numActions, testG.numActions, "numActions"); //should not change
-    assertTrue(G.numBuys, testG.numBuys, "numBuys");
-    assertTrue(G.discardCount[0], testG.discardCount[0], "discardCount"); //bought card
-    assertTrue(G.coins, testG.coins, "coin amount"); //make sure 6 coins was taken from the current player
+    passed *= assertTrue(G.supplyCount[adventurer], ((testG.supplyCount[adventurer])), "supplyCount");
+    passed *= assertTrue(G.handCount[0], testG.handCount[0], "handCount");
+    passed *= assertTrue(G.numActions, testG.numActions, "numActions"); //should not change
+    passed *= assertTrue(G.numBuys, testG.numBuys, "numBuys");
+    passed *= assertTrue(G.discardCount[0], testG.discardCount[0], "discardCount"); //bought card
+    passed *= assertTrue(G.coins, testG.coins, "coin amount"); //make sure 6 coins was taken from the current player
 
+    if(passed == 1){
+        printf("--------------| TEST SUCCESSFUL |-------------\n\n");
+    }
+    else{
+        printf("--------------| TEST FAILED |-------------\n\n");
+    }
 return 0;
 }
