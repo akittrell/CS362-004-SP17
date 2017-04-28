@@ -23,8 +23,27 @@ unittestresults.out: unittest1.c unittest2.c unittest3.c unittest4.c dominion.c 
 	unittest4 >> unittestresults.out
 	gcov dominion.c >> unittestresults.out
 	
+	echo "Result for running cardtest1:" >> unittestresults.out
+	gcc -o cardtest1 cardtest1.c dominion.c rngs.c assertTrue.c $(CFLAGS)
+	unittest4 >> unittestresults.out
+	gcov dominion.c >> unittestresults.out
+	
+	echo "Result for running cardtest2:" >> unittestresults.out
+	gcc -o cardtest2 cardtest2.c dominion.c rngs.c assertTrue.c $(CFLAGS)
+	cardtest2 >> unittestresults.out
+	gcov dominion.c >> unittestresults.out
+	
+	echo "Result for running cardtest3:" >> unittestresults.out
+	gcc -o cardtest3 cardtest3.c dominion.c rngs.c assertTrue.c $(CFLAGS)
+	cardtest3 >> unittestresults.out
+	gcov dominion.c >> unittestresults.out
+	
+	echo "Result for running cardtest4:" >> unittestresults.out
+	gcc -o cardtest4 cardtest4.c dominion.c rngs.c assertTrue.c $(CFLAGS)
+	cardtest4 >> unittestresults.out
+	gcov dominion.c >> unittestresults.out
 clean:
 	rm -f unittestresults.out
 	
 cleanall:
-	rm -f unittestresults.out unittest1 unittest2 unittest3 unittest4 *.gcda *.gcno *.gcov
+	rm -f unittestresults.out unittest1 unittest2 unittest3 unittest4 cardtest1 cardtest2 cardtest3 cardtest4 *.gcda *.gcno *.gcov
