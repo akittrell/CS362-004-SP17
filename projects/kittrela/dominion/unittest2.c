@@ -18,13 +18,14 @@
 #include <assert.h>
 #include "rngs.h"
 #include <stdlib.h>
+#include "assertTrue.h"
 
 int main(){
     int i, j, l, m, n, o;
     int seed = 100;
     int numPlayer = 2;
     int handCount;
-    int passed;
+    int passed; //indicator of a failed subtest in a larger test. If a subtest fails, passed = 0;
     //Kingdom Cards we will use for testing.
     int mostCards[16] = { copper, silver, gold, estate, duchy, curse, adventurer, council_room, feast, gardens, mine, remodel,
                  smithy, village, baron, great_hall};    //all cards in the game, minus Province

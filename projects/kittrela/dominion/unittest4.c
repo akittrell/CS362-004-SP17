@@ -17,6 +17,7 @@
 #include <assert.h>
 #include "rngs.h"
 #include <stdlib.h>
+#include "assertTrue.h"
 
 int main(){
     int i, j, l, m, n, o;

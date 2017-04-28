@@ -21,10 +21,11 @@
 #include <assert.h>
 #include "rngs.h"
 #include <stdlib.h>
+#include "assertTrue.h"
 
 int main(){
     int i;
-    int passed;
+    int passed; //indicator of a failed subtest in a larger test. If a subtest fails, passed = 0;
     int seed = 100;
     int numPlayer = 2;
     int handCount;
@@ -43,12 +44,10 @@ int main(){
     printf("---------| TEST 1: NOT ENOUGH MONEY TO PURCHASE |------------\n");
     passed = 1;
         //replace all cards in hand with estates (ie, no coins)
-    printf("Coin amount BEFORE estate replacement: %d\n", G.coins);
     for (i=0; i<G.handCount[0];i++){
         G.hand[0][i] = estate;
     }
     updateCoins(0, &G, 0);
-    printf("Coin amount after estate replacement: %d\n", G.coins);
     //copy current game state into our test state
     memcpy(&testG, &G, sizeof(struct gameState));
 
