@@ -278,7 +278,6 @@ int buyCard(int supplyPos, struct gameState *state) {
   // I don't know what to do about the phase thing.
 
   who = state->whoseTurn;
-
   if (state->numBuys < 1){
     if (DEBUG)
       printf("You do not have any buys left\n");

@@ -80,7 +80,7 @@ int main(){
     buyCard(adventurer, &G);
 
     passed *= assertTrue(G.supplyCount[adventurer], ((testG.supplyCount[adventurer])-1), "supplyCount");
-    passed *= assertTrue(G.handCount[0], testG.handCount[0], "handCount");
+    passed *= assertTrue(G.handCount[0], testG.handCount[0]-2, "handCount"); //after a card is purchased, there should be less the number of cards it took to purchase (this case -2)
     passed *= assertTrue(G.numActions, testG.numActions, "numActions"); //should not change
     passed *= assertTrue(G.numBuys, testG.numBuys-1, "numBuys");
     passed *= assertTrue(G.discardCount[0], testG.discardCount[0]+1, "discardCount"); //bought card
