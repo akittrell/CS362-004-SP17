@@ -56,10 +56,10 @@ int main(){
     memcpy(&testG, &G, sizeof(struct gameState));
 
     cardAdventurer(&testG, testG.whoseTurn);
-    passed *= assertTrue(testG.handCount[curPlayer], G.handCount[curPlayer] + 2, "cur players hand count");
+    passed *= assertTrue(testG.handCount[curPlayer], G.handCount[curPlayer] + 2 -1, "cur players hand count"); //+2 from deck, -1 from playing adventurer
     passed *= assertTrue(testG.handCount[opponent], G.handCount[opponent], "opponents hand count");//make sure this has not changed
 
-    passed *= assertTrue(testG.deckCount[curPlayer]+testG.discardCount[curPlayer], G.deckCount[curPlayer]+G.discardCount[curPlayer]-2, "deck+discard count"); //discard+deck should have 2 less cards
+    passed *= assertTrue(testG.deckCount[curPlayer]+testG.discardCount[curPlayer], G.deckCount[curPlayer]+G.discardCount[curPlayer]-2 +1, "deck+discard count"); //discard+deck should have -2 cards, +1 card for adventurer
 
     for(i=0; i < 17; i++){
         passed *= assertTrue(testG.supplyCount[ allCards[i] ], G.supplyCount[ allCards[i] ], "other supply counts");
@@ -72,7 +72,7 @@ int main(){
         printf(" !!!!!!!!!!!!!!! TEST FAILED !!!!!!!!!!!!!!!\n\n");
     }
 
-    printf("---------| TEST 2: 1 TREASURE CARDS EXIST IN DISCARD AND DECK, +1 IN HAND, -1 CARDS IN DECK + DISCARD |------------\n");
+    printf("---------| TEST 2: 1 TREASURE CARDS EXIST IN DISCARD AND DECK, +1 To HAND, -1 CARDS IN DECK + DISCARD |------------\n");
     passed = 1;
     //make sure 1 treasure cards for sure exist for drawing
     for(i = 0; i < G.deckCount[curPlayer]; i++){
@@ -85,10 +85,10 @@ int main(){
     memcpy(&testG, &G, sizeof(struct gameState));
 
     cardAdventurer(&testG, testG.whoseTurn);
-    passed *= assertTrue(testG.handCount[curPlayer], G.handCount[curPlayer] + 1, "cur players hand count");
+    passed *= assertTrue(testG.handCount[curPlayer], G.handCount[curPlayer] + 1 -1, "cur players hand count"); //+1 treasure,-1 for played adventurer
     passed *= assertTrue(testG.handCount[opponent], G.handCount[opponent], "opponents hand count");//make sure this has not changed
 
-    passed *= assertTrue(testG.deckCount[curPlayer]+testG.discardCount[curPlayer], G.deckCount[curPlayer]+G.discardCount[curPlayer]-1, "deck+discard count");//discard+deck should have 1 less cards
+    passed *= assertTrue(testG.deckCount[curPlayer]+testG.discardCount[curPlayer], G.deckCount[curPlayer]+G.discardCount[curPlayer]-1 +1, "deck+discard count");//discard+deck should have -1 for treasure, +1 for adventurer
 
 
     for(i=0; i < 17; i++){
@@ -114,7 +114,7 @@ int main(){
     memcpy(&testG, &G, sizeof(struct gameState));
 
     cardAdventurer(&testG, testG.whoseTurn);
-    passed *= assertTrue(testG.handCount[curPlayer], G.handCount[curPlayer], "cur players hand count");
+    passed *= assertTrue(testG.handCount[curPlayer], G.handCount[curPlayer] -1, "cur players hand count"); //played adventurer to no effect
     passed *= assertTrue(testG.handCount[opponent], G.handCount[opponent], "opponents hand count");//make sure this has not changed
 
     for(i=0; i < 17; i++){
