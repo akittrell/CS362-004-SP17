@@ -61,22 +61,22 @@ int main(){
     //check each card in play.
     for(i = 0; i < 17; i++){
         if(allCards[i] <= province && allCards[i] >= estate || allCards[i] == gardens || allCards[i] == great_hall){
-            passed *= assertTrue(testG.supplyCount[ allCards[i] ], numVictory, "Victory Card Supply");//depends on the number of players
+            passed *= assertTrue(supplyCount(allCards[i], &testG), numVictory, "Victory Card Supply");//depends on the number of players
         }
         else if(allCards[i] == curse){
-            passed *= assertTrue(testG.supplyCount[ allCards[i] ], numCurse, "Curse Card Supply"); //depends on the number of players
+            passed *= assertTrue(supplyCount(allCards[i], &testG), numCurse, "Curse Card Supply"); //depends on the number of players
         }
         else if(allCards[i] == gold){
-            passed *= assertTrue(testG.supplyCount[ allCards[i] ], numGold, "Gold Supply");
+            passed *= assertTrue(supplyCount(allCards[i], &testG), numGold, "Gold Supply");
         }
         else if(allCards[i] == silver){
-            passed *= assertTrue(testG.supplyCount[ allCards[i] ], numSilver, "Silver Supply");
+            passed *= assertTrue(supplyCount(allCards[i], &testG), numSilver, "Silver Supply");
         }
         else if(allCards[i] == copper){
-            passed *= assertTrue(testG.supplyCount[ allCards[i] ], numCopper, "Copper Supply"); //depends on the number of players
+            passed *= assertTrue(supplyCount(allCards[i], &testG), numCopper, "Copper Supply"); //depends on the number of players
         }
         else{
-            passed *= assertTrue(testG.supplyCount[ allCards[i] ], 10, "Kingdom Supply Card"); //should always be 10
+            passed *= assertTrue(supplyCount(allCards[i], &testG), 10, "Kingdom Supply Card"); //should always be 10
         }
     }
     if(passed == 1){
@@ -94,7 +94,7 @@ int main(){
     for(i = 0; i < 17; i++){
         //remove card from allCards[i] supply
         testG.supplyCount[ allCards[i] ] = testG.supplyCount[ allCards[i] ] -1;
-        passed *= assertTrue(testG.supplyCount[ allCards[i] ], G.supplyCount[ allCards[i] ] -1, "");//depends on the number of players
+        passed *= assertTrue(supplyCount(allCards[i], &testG), supplyCount(allCards[i], &G) -1, "");//depends on the number of players
     }
     if(passed == 1){
         printf("--------------| TEST SUCCESSFUL |-------------\n\n");
