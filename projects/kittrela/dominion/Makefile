@@ -1,4 +1,4 @@
-CFLAGS = -Wall -fpic -coverage -lm
+CFLAGS = -Wall -fpic -fprofile-arcs -ftest-coverage -coverage -lm
 
 default: unittestresults.out
 
@@ -9,6 +9,7 @@ unittestresults.out: unittest1.c unittest2.c unittest3.c unittest4.c dominion.c 
 	gcov dominion.c >> unittestresults.out
 	echo
 	gcov dominion.c -b -f >> unittestresults.out
+
 	
 	echo "Result for running unittest2:" >> unittestresults.out
 	gcc -o unittest2 unittest2.c dominion.c rngs.c assertTrue.c $(CFLAGS)
