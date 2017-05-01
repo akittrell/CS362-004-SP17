@@ -59,6 +59,5 @@ int main(int argc, char *argv[])
 {
     srand(time(NULL));
     testme();
-    inputString();
     return 0;
 }
