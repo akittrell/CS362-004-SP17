@@ -1,4 +1,10 @@
-// Random Card Tester for card Adventurer
+/*
+*   Basic templating provided by betterTestDrawCard.c via
+*   Oregon State's CS 362 class.
+*
+*   Test for the Adventurer card
+*
+*/
 
 #include "dominion.h"
 #include "dominion_helpers.h"
@@ -7,140 +13,117 @@
 #include <assert.h>
 #include "rngs.h"
 #include <stdlib.h>
-#include <time.h>
+#include "assertTrue.h"
+#include <math.h>
 
-int main() {
-    struct gameState G;
-    int seed = 1000;
-    int passAll = 0;
-    int testDraw = 0;
-    int failDiscard = 0;
-    int numberPlayers = 2;
-    int currentPlayer = 0;
-	int k[10] = {adventurer, embargo, village, minion, mine, cutpurse,
-			sea_hag, tribute, smithy, council_room};  
-    int sizeofDeck, sizeofHand;
-    int i, j, q, m, x;
-    int randomCard, randK;
-    int treasureCopper, treasureSilver, treasureGold;
-    int startCoin, currentCoin;
-    
-    
-    srand(time(NULL));
-   
-    for(i = 0; i < 1000000; i++){
-        initializeGame(numberPlayers, k, seed, &G);
-        startCoin = 0;
-        sizeofDeck = rand() % (MAX_DECK + 1);
-   
-        sizeofHand = rand() % (sizeofDeck + 1);
-      
-        
-        G.deckCount[0] = sizeofDeck - sizeofHand;
-        G.handCount[0] = sizeofHand;
-        
-      
 
- // Determine treasure cards...      
-        
-        for (j = 0; j < numberPlayers; j++){
-            for(q = 0;q < G.deckCount[j]; q++){
-                randomCard = rand() % (50 + 1);
-                randK = rand() % (10);
-                if(randomCard == 1){
-                    G.deck[j][q] = copper;
-                } else if(randomCard == 2){
-                    G.deck[j][q] = silver;
-                }else if(randomCard == 3){
-                    G.deck[j][q] = gold;
-                }else {
-                    G.deck[j][q] = k[randK];
-                }
+int main(){
+    int NUM_ITR = 5000;
+    struct gameState pre, post;
+    int i, n, p, deckCount, discardCount, handCount, numTreasure;
+
+    SelectStream(2);
+    PutSeed(3);
+
+    for (n = 0; n < NUM_ITR; n++) {
+        for (i = 0; i < sizeof(struct gameState); i++) {
+          ((char*)&post)[i] = floor(Random() * 256);
+        }
+//printf("After first for\n");
+    p = floor(Random() * 2);
+    post.deckCount[p] = floor(Random() * MAX_DECK);
+    post.discardCount[p] = floor(Random() * MAX_DECK);
+    post.handCount[p] = floor(Random() * MAX_HAND);
+
+    numTreasure = floor(Random() * 3);
+    if(numTreasure == 3){
+        numTreasure = 0;
+    }
+    int treasureType;
+    int curTreasures[3];    //holds random selected treasures
+    for(i=0; i<numTreasure; i++){
+        treasureType = floor(Random() * 3);
+        if(treasureType == 1)
+                curTreasures[i] = copper;
+            else if(treasureType == 2)
+                curTreasures[i] = silver;
+            else
+                curTreasures[i] = gold;
+    }
+//    printf("After treasure Assignments\n");
+    //adds either 0, 1, or 2 treasure cards to deck/discard.
+    switch (numTreasure){
+        case 1://1 treasure in deck/discard
+//            printf("in case 1\n");
+            if(floor(Random() * 2 == 1))
+                post.deck[p][0] = curTreasures[0];
+            else
+                post.discard[p][0] = curTreasures[0];
+            break;
+        case 2:
+//            printf("in case 2\n");
+            i = 0;
+            while(i < 2){
+                if(floor(Random() * 2 == 1))
+                    post.deck[p][i] = curTreasures[i];
+                else
+                    post.discard[p][i] = curTreasures[i];
+                i++;
             }
-        }
-
- //...and get counts for compare. 
-        
-        for(m = 0; m < G.handCount[currentPlayer]; m++){
-            if(G.hand[currentPlayer][m] == copper || G.hand[currentPlayer][m] == silver || G.hand[currentPlayer][m] == gold){
-                startCoin++;
+            break;
+        case 0: //no treasures in deck or discard. clear cards to non-treasure cards
+//            printf("in case 0\n");
+ //           printf("deck count: %d\n", post.deckCount[p]);
+            for(i=0; i<post.deckCount[p]; i++){
+                //printf("p = %d, number is: %d\n", p, post.deck[p][i]);
+                post.deck[p][i] = estate;
             }
-        }
-   
-        playAdventurer(currentPlayer, &G);   
-        
-        currentCoin = 0;
-        
-        for(m = 0; m < G.handCount[currentPlayer]; m++){
-            if(G.hand[currentPlayer][m] == copper || G.hand[currentPlayer][m] == silver || G.hand[currentPlayer][m] == gold){
-                currentCoin++;
+//           printf("Going to assign card to discard\n");
+            for(i=0; i<post.discardCount[p]; i++){
+                post.discard[p][i] = estate;
             }
-        }
-       
-        treasureCopper = 0;
-        treasureSilver = 0;
-        treasureGold = 0;
+            break;
+        default:
+            break;
+    }
+//    printf("After Switch statement from hell\n");
+
+    memcpy (&pre, &post, sizeof(struct gameState));
+    cardAdventurer(&post, p);
+    //check if no treasures are in the deck or discard.
+    if(numTreasure == 0){
+        pre.handCount[p]--;
+        pre.discardCount[p]++;
+        pre.playedCardCount++;
+    }
+    else if (numTreasure == 1){
+        //total hand count stays the same
+        pre.discardCount[p]++;//should contain the adventurer card
+        pre.playedCardCount++;
+        pre.coins += getCost(pre.hand[p][pre.handCount[p]]);
+    }
+    else if (numTreasure == 2){
+        pre.handCount[p]++; //player has gained 1 card in total
+        pre.discardCount[p]++; //should contain the adventurer card
+        pre.playedCardCount++;
+        pre.coins += getCost(pre.hand[p][pre.handCount[p]-1]) + getCost(pre.hand[p][pre.handCount[p]-2]);
+    }
+
+    printf("\n---------------TESTING MEMORY COMPARISON---------------\n");
+    //if it does not pass, dig deeper and figure out what is not matching up.
+    if(assertTrue(memcmp(&pre, &post, sizeof(struct gameState)), 0, "Memory Comparison") != 1){
+        printf("\n----------------TEST FAILURE----------------\n");
+        printf("\nSpecifics:\n");
+        printf("NumTreasure: %d\n", numTreasure);
+        assertTrue(pre.discardCount[p], post.discardCount[p], "0 Discard Count Comparison");
+        assertTrue(pre.handCount[p], post.handCount[p], "1 Hand Count Comparison");
+        assertTrue(pre.playedCardCount, post.playedCardCount, "2 playedCardCount Count Comparison");
+        assertTrue(pre.coins, post.coins, "3 Coins Count Comparison");
+        printf("\n\n");
+    }
 
 
-        for(x = 0; x < G.discardCount[currentPlayer]; x++){
-            if(G.discard[currentPlayer][x] == copper) {
-                treasureCopper++;
-            } else if(G.discard[currentPlayer][x] == silver) {
-                treasureSilver++;
-            } else if(G.discard[currentPlayer][x] == gold) {
-                treasureGold++;
-            }
-        }
+    }
+return 0;
 
-// Card count/drawn tests
-
-
-        int passTest = 1;
-        printf("Testing Card - Adventurer\n");
-        if(currentCoin > (startCoin + 2)){
-            printf("FAIL - Card draw\n\n");
-            testDraw++;
-            passTest = 0;
-        }
-        
-        if(currentCoin < startCoin){
-            printf("FAIL - Card count\n\n");
-            testDraw++;
-            passTest = 0;
-        }
-
-
-   // Test if adventurer pulls treasure cards from hand 
-
-
-        if(treasureGold != 0){
-            printf("FAIL - Gold\n\n");
-            failDiscard++;
-            passTest = 0;
-        }
-
-         if(treasureSilver != 0){
-            printf("FAIL - Silver\n\n");
-            failDiscard++;
-            passTest = 0;
-        }
-
-        if(treasureCopper != 0){
-            printf("FAIL - Copper\n\n");
-            failDiscard++;
-            passTest = 0;
-        }
-
-        if(passTest == 1){
-            printf("PASS - All\n\n");
-            passAll++;
-        }
-   }
-   
-   printf("\n\n");
-   printf("Adventurer Tests - PASS %d\n", passAll);
-   printf("FAIL - Draw Count %d\n", testDraw);
-   printf("FAIL - Discard Count %d\n\n", failDiscard);
-   
-   return 0;
 }

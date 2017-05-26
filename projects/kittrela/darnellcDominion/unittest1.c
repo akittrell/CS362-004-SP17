@@ -1,143 +1,125 @@
-// Author: Chris Darnell
-// 4/30/2017
-// unittest1.c - getCost
+/*
+*   Basic templating provided by cardtest4.c and testUpdateCoins.c via
+*   Oregon State's CS 362 class.
+*
+*   Test for the buyCard function
+*   Need to check:
+    1) Current player does not have enough coins to purchase said card
+    2) Current Player has enough money and buys left
+        - Player has +1 cards in discard
+        - Player has 1 less buy
+        - Players gold has decreased by the number of coins the card has cost
+        - The supplyCount that held the card is -1 card
+        - No other gameState has changed
+        - Cannot purchase if card the supply count is 0
+*/
 
 #include "dominion.h"
+#include "dominion_helpers.h"
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
 #include "rngs.h"
-#include "dominion_helpers.h"
-#include "assert.h"
+#include <stdlib.h>
+#include "assertTrue.h"
 
-#define TESTUNIT "adventurer_getcost"
-#define TESTUONE "embargo_getcost"
-#define TESTUTWO "village_getcost"
-#define TESTUTHR "minion_getcost"
-#define TESTUFOU "mine_getcost"
-#define TESTUFIV "cutpurse_getcost"
-#define TESTUSIX "sea_hag_getcost"
-#define TESTUSEV "tribute_getcost"
-#define TESTUEIG "smithy_getcost"
-#define TESTUNIN "council_room_getcost"
-
-// Unit Test  -- getCost
-
-// Test if cost of ______ card being gathered by getCost is correct. 
-
-
-int main() {
-
-// Init costs.
-
+int main(){
+    int i;
+    int passed; //indicator of a failed subtest in a larger test. If a subtest fails, passed = 0;
+    int seed = 100;
+    int numPlayer = 2;
+    int handCount;
+    //Kingdom Cards we will use for testing.
+    int k[10] = { adventurer, council_room, feast, gardens, mine, remodel,
+                 smithy, village, baron, great_hall };
     struct gameState G;
-    int k[10] = {adventurer, gardens, embargo, village, minion, mine, cutpurse, sea_hag, tribute, smithy};
-   
+    struct gameState testG; //The gamestate we will use for testing consistency
 
- // Init new game instance
+    //initialize game state with our selected player cards.
+    initializeGame(numPlayer, k, seed, &G);
 
+    printf("---------------| TESTING buyCard() |-------------------\n");
+    G.whoseTurn = 0; //player 1 is going to be the test player here
 
-   int r = initializeGame(2, k, 2, &G);
-   assert(r == 0);
+    printf("---------| TEST 1: NOT ENOUGH MONEY TO PURCHASE |------------\n");
+    passed = 1;
+        //replace all cards in hand with estates (ie, no coins)
+    for (i=0; i<G.handCount[0];i++){
+        G.hand[0][i] = estate;
+    }
+    updateCoins(0, &G, 0);
+    //copy current game state into our test state
+    memcpy(&testG, &G, sizeof(struct gameState));
 
+    buyCard(adventurer, &G);
+    passed *= assertTrue(G.supplyCount[adventurer], testG.supplyCount[adventurer], "supplyCount");
+    passed *= assertTrue(G.handCount[0], testG.handCount[0], "handCount");
+    passed *= assertTrue(G.numActions, testG.numActions, "numActions");
+    passed *= assertTrue(G.numBuys, testG.numBuys, "numBuys");
+    for (i = 0; i < 5 ; i++){
+        passed *= assertTrue(G.hand[0][i], estate, "cards in hand");
+    }
 
+    if(passed == 1){
+        printf("--------------| TEST SUCCESSFUL |-------------\n\n");
+    }
+    else{
+        printf("--------------| TEST FAILED |-------------\n\n");
+    }
+    printf("---------| TEST 2: CARD CAN BE PURCHASED AND CARD SUPPLY > 0 |------------\n");
+    passed = 1;
+    //replace all cards in player 1's hand with gold, so that they have enough to purchase desired card
+    //for both test states
+    for (i=0; i<G.handCount[0];i++){
+        G.hand[0][i] = gold;
+        testG.hand[0][i]=gold;
+    }
+    updateCoins(0, &G, 0);
+    updateCoins(0,&testG, 0);
+    buyCard(adventurer, &G);
 
-   printf("----------------- Testing: getCost ----------------\n");
+    passed *= assertTrue(G.supplyCount[adventurer], ((testG.supplyCount[adventurer])-1), "supplyCount");
+    passed *= assertTrue(G.handCount[0], testG.handCount[0]-2, "handCount"); //after a card is purchased, there should be less the number of cards it took to purchase (this case -2)
+    passed *= assertTrue(G.numActions, testG.numActions, "numActions"); //should not change
+    passed *= assertTrue(G.numBuys, testG.numBuys-1, "numBuys");
+    passed *= assertTrue(G.discardCount[0], testG.discardCount[0]+1, "discardCount"); //bought card
+    passed *= assertTrue(G.coins, testG.coins-6, "coin amount"); //make sure 6 coins was taken from the current player
 
-    
-// Game should init to something...
+    if(passed == 1){
+        printf("--------------| TEST SUCCESSFUL |-------------\n\n");
+    }
+    else{
+        printf("--------------| TEST FAILED |-------------\n\n");
+    }
+    printf("---------| TEST 3: SUPPLY OF CARD = 0 |------------\n");
+    passed = 1;
+    memcpy(&G, &testG, sizeof(struct gameState));
 
-    printf(" TEST PASS\n");
+    //set supply to 0 for adventurer
+    G.supplyCount[adventurer] = 0;
+    testG.supplyCount[adventurer]= 0;
+    //set player up for enough gold to purchase card
+    for (i=0; i<G.handCount[0];i++){
+        G.hand[0][i] = gold;
+        testG.hand[0][i] = gold;
+    }
+    updateCoins(0, &G, 0);
+    updateCoins(0,&testG, 0);
 
-// Adventurer should be 6
+    buyCard(adventurer, &G);
+    //no differences should be present between the two states
+    passed *= assertTrue(G.supplyCount[adventurer], ((testG.supplyCount[adventurer])), "supplyCount");
+    passed *= assertTrue(G.handCount[0], testG.handCount[0], "handCount");
+    passed *= assertTrue(G.numActions, testG.numActions, "numActions"); //should not change
+    passed *= assertTrue(G.numBuys, testG.numBuys, "numBuys");
+    passed *= assertTrue(G.discardCount[0], testG.discardCount[0], "discardCount"); //bought card
+    passed *= assertTrue(G.coins, testG.coins, "coin amount"); //make sure 6 coins was taken from the current player
 
-	printf("----------------- Testing Unit: %s ----------------\n", TESTUNIT);
-   
-
-        assert(getCost(adventurer) == 6);
-
-		printf(" TEST PASS\n");
-
-// Embargo should be 2	
-
-		printf("----------------- Testing Unit: %s ----------------\n", TESTUONE);
-
-        assert(getCost(embargo) == 2);
-       
-        printf(" TEST PASS\n");
-
- // Village should be 3	
-
-		printf("----------------- Testing Unit: %s ----------------\n", TESTUTWO);
-
-        assert(getCost(village) == 3);
-
-        printf(" TEST PASS\n");
-
-
-// Minion should be 5	
-
-		printf("----------------- Testing Unit: %s ----------------\n", TESTUTHR);
-
-      
-        assert(getCost(minion) == 5);
-
-        printf(" TEST PASS\n");
-
-// Mine should be 5	
-
-		printf("----------------- Testing Unit: %s ----------------\n", TESTUFOU);
-
-        assert(getCost(mine) == 5);
-
-        printf(" TEST PASS\n");
-
- // cutPurse should be 4	
-
-		printf("----------------- Testing Unit: %s ----------------\n", TESTUFIV);
-
-      
-        assert(getCost(cutpurse) == 4);
-
-        printf(" TEST PASS\n");
-
-
- // Sea Hag should be 4	
-
-		printf("----------------- Testing Unit: %s ----------------\n", TESTUSIX);
-
-        assert(getCost(sea_hag) == 4);
-
-        printf(" TEST PASS\n");
-
- // Tribute should be 5	
-
-		printf("----------------- Testing Unit: %s ----------------\n", TESTUSEV);
-
-        assert(getCost(tribute) == 5);
-
-        printf(" TEST PASS\n");
-
-  // Smithy should be 4	
-
-		printf("----------------- Testing Unit: %s ----------------\n", TESTUEIG);
-
-        assert(getCost(smithy) == 4);
-
-        printf(" TEST PASS\n");
-
- // Council Room should be 5	
-
-		printf("----------------- Testing Unit: %s ----------------\n", TESTUNIN);
-
-    
-        assert(getCost(council_room) == 5);
-
-        printf(" TEST PASS\n");
-
-
-    	printf("\n >>>>> SUCCESS: Testing complete getCost <<<<<\n");
-
-
-	return 0;
+    if(passed == 1){
+        printf("--------------| TEST SUCCESSFUL |-------------\n\n");
+    }
+    else{
+        printf("--------------| TEST FAILED |-------------\n\n");
+    }
+return 0;
 }
