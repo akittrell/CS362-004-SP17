@@ -89,7 +89,8 @@ int main(){
 //    printf("After Switch statement from hell\n");
 
     memcpy (&pre, &post, sizeof(struct gameState));
-    cardAdventurer(&post, p);
+    cardEffect(adventurer, 0,0,0, &post, 0, 0);
+	//cardAdventurer(&post, p);
     //check if no treasures are in the deck or discard.
     if(numTreasure == 0){
         pre.handCount[p]--;

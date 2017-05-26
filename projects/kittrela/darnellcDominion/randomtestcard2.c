@@ -18,7 +18,7 @@
 
 
 int main(){
-    int NUM_ITR = 5000;
+    int NUM_ITR = 50;
     struct gameState pre, post;
     int i, n, p, deckCount, discardCount, handCount, handP;
 
@@ -46,7 +46,8 @@ int main(){
     int cost = getCost(trashCard); //get the cost of the trashed card for comparison later on
 
     memcpy (&pre, &post, sizeof(struct gameState));
-    cardSalvager(&post, trashCardPos, p, handP);
+    cardEffect(salvager, trashCardPos, 0, 0, &post, handP, 0);
+	//cardSalvager(&post, trashCardPos, p, handP);
     pre.coins += cost; //coins should be equal to the cost of the card.
     pre.handCount[p] = pre.handCount[p] - 2; //We have gotten rid of both salvager and the trashed card
     pre.numBuys++; //number of buys has increased.

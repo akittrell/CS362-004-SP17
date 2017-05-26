@@ -1,247 +1,97 @@
-// Author: Chris Darnell
-// 4/30/2017
-// cardtest1.c - Adventurer
+/*
+*   Basic templating provided by cardtest4.c and testUpdateCoins.c via
+*   Oregon State's CS 362 class.
+*
+*   Test for the Smithy card:
+*   TEXT: +3 Cards
+*   Need to check:
+*   1) -3 cards in current players deck
+*   2) +3 cards in current players hand
+*   3) -1 Action for current player
+*   4) +0 Cards in opponents hand
+*   5) No other card piles have changed values
+*
+*/
 
-#include <assert.h>
 #include "dominion.h"
-#include <stdio.h>
-#include "rngs.h"
-// for rand
-#include <time.h>
-#include <stdlib.h>
+#include "dominion_helpers.h"
 #include <string.h>
-#include <math.h>
+#include <stdio.h>
+#include <assert.h>
+#include "rngs.h"
+#include <stdlib.h>
+#include "assertTrue.h"
 
-#define TESTCARD "adventurer"
+int main(){
+    char *card = "Smithy";  //card name we are testing
+    int i, j, l, m, n, o;
+    int seed = 100;
+    int handpos = 0, curPlayer = 0, opponent = 1;
 
-// Unit Test  -- Adventurer
+    //set up the number of special cards that depend on the number of players
+    int numPlayer = 2;
+    int handCount;
+    int passed;
 
-// Adventurer should be an Action that digs for Treasure cards in your deck
+    //Kingdom Cards we will use for testing.
+    int allCards[17] = { copper, silver, gold, estate, duchy, province, curse, adventurer, council_room, feast, gardens, mine, remodel,
+                 smithy, village, baron, great_hall};    //all cards in the current game
+    int k[10] = { adventurer, council_room, feast, gardens, mine, remodel,
+                 smithy, village, baron, great_hall };
+    struct gameState G;
+    struct gameState testG; //The gamestate we will use for testing consistency
 
-int main() 
+    //initialize game state with our selected player cards.
+    initializeGame(numPlayer, k, seed, &G);
+    G.whoseTurn = 0;    //player 1's turn
+    memcpy(&testG, &G, sizeof(struct gameState));
 
-{
+    printf("---------------| TESTING CARD: %s|-------------------\n", card);
+    printf("---------| TEST 1: -3 CARDS FROM PLAYER 1 DECK |------------\n");
+    passed = 1;
+	playSmithy( curPlayer, &testG, handpos);
+ //   cardSmithy(&testG, testG.whoseTurn, handpos);
+    passed *= assertTrue(testG.deckCount[curPlayer], G.deckCount[curPlayer]-3, "current players deck count");
+    passed *= assertTrue(testG.deckCount[opponent], G.deckCount[opponent], "opponents deck count");
 
-	int i, numPlayers, handPos, randomSeed;
-	int choice1 = 0, choice2 = 0, choice3 = 0, bonus = 0;
-	int currentPlayer = 0, testPass = 0, oneFail = 0, twoFail = 0;
-	struct gameState beforePlay, afterPlay;
-	int k[10] = {adventurer, remodel, village, minion, mine, cutpurse, sea_hag, tribute, smithy, council_room};
-	
-// seed rand within bounds for numPlayers/handPos/randomSeed
-	
-	srand(time(NULL));
-	numPlayers = (rand() % 3) + 2;
-	handPos = (rand() % 5);
-	randomSeed = (rand() % 100);
+    if(passed == 1){
+        printf("--------------| TEST SUCCESSFUL |-------------\n\n");
+    }
+    else{
+        printf(" !!!!!!!!!!!!!!! TEST FAILED !!!!!!!!!!!!!!!\n\n");
+    }
 
+    printf("---------| TEST 2: +3 CARDS ADDED TO PLAYER 1) |------------\n");
+    passed = 1;
+    memcpy(&testG, &G, sizeof(struct gameState));
+    //cardSmithy(&testG, testG.whoseTurn, handpos);
+	playSmithy( curPlayer, &testG, handpos);
 
+    passed *= assertTrue(testG.handCount[curPlayer], G.handCount[curPlayer] +3, "current player hand count");
+    passed *= assertTrue(testG.handCount[opponent], G.handCount[opponent], "opponent hand count");
+    if(passed == 1){
+        printf("--------------| TEST SUCCESSFUL |-------------\n\n");
+    }
+    else{
+        printf(" !!!!!!!!!!!!!!! TEST FAILED !!!!!!!!!!!!!!!\n\n");
+    }
 
-	printf("----------------- Testing Card: %s ----------------\n", TESTCARD);
+    printf("---------| TEST 3: NO OTHER SUPPLY PILES HAVE CHANGED COUNT |------------\n");
+    passed = 1;
+    memcpy(&testG, &G, sizeof(struct gameState));
+    //cardSmithy(&testG, testG.whoseTurn, handpos);
+	playSmithy( curPlayer, &testG, handpos);
 
-
-	printf("----------------- Test: 2 or More Treasure Cards in Deck ----------------\n");
-
-// Initialize a game state 
-	
-	initializeGame(numPlayers, k, randomSeed, &afterPlay);
-	
-// Set Adventurer for testing
-	
-	afterPlay.hand[currentPlayer][handPos] = adventurer;
-	
-	memcpy(&beforePlay, &afterPlay, sizeof(struct gameState));
-
-		
-	
-// check AdventurerEffect
-	
-	if (cardEffect(adventurer, choice1, choice2, choice3, &afterPlay, handPos, &bonus) != 1) {
-		printf("TEST PASS\n");
-		testPass = -1;
-	}
-	
-
-
-
-// Check currentPlayer handCount.
-
-// Should be +1 for treasure add , -1 for play of adventurer card
-
-printf("----------------- Test: Current Player Hand Count ----------------\n");
-	
-	if (afterPlay.handCount[currentPlayer] = beforePlay.handCount[currentPlayer]) {
-		printf("TEST PASS\n");
-		testPass = -1;
-	}
-	
-	
-
-// Check that adventurer card added to played pile
-
-printf("----------------- Test: Adventurer Added to Played Card Pile After Play ----------------\n");
-
-	if  (afterPlay.playedCards[beforePlay.playedCardCount] = adventurer) {
-		printf("TEST PASS\n");
-		testPass = -1;
-	}
-
-
-// Test playedCardCount incremented by 1
-
-printf("----------------- Test: Number of Cards Played Incremented ----------------\n");
+    for(i=0; i < 17; i++){
+        passed *= assertTrue(testG.supplyCount[ allCards[i] ], G.supplyCount[ allCards[i] ], "other supply counts");
+    }
+    if(passed == 1){
+        printf("--------------| TEST SUCCESSFUL |-------------\n\n");
+    }
+    else{
+        printf(" !!!!!!!!!!!!!!! TEST FAILED !!!!!!!!!!!!!!!\n\n");
+    }
 
 
-	if  (afterPlay.playedCardCount = beforePlay.playedCardCount + 1) {
-		printf("TEST PASS\n");
-		testPass = -1;
-	}
-
-	
-// Verify card added is treasure
-	
-printf("----------------- Test: Card Added is treasure ----------------\n");
-
-	int addedCard = afterPlay.hand[currentPlayer][afterPlay.handCount[currentPlayer] - 1];
-	if ((addedCard = copper) || (addedCard = silver) || (addedCard = gold)) {
-		printf("TEST PASS\n");
-	}
-
-	addedCard = afterPlay.hand[currentPlayer][afterPlay.handCount[currentPlayer] - 2];
-	if ((addedCard = copper) || (addedCard = silver) || (addedCard = gold)) {
-		printf("TEST PASS\n");
-	}
-	
-
-	addedCard = afterPlay.hand[currentPlayer][afterPlay.handCount[currentPlayer] - 1];
-	if ((addedCard = copper) || (addedCard = silver) || (addedCard = gold)) {
-		printf("TEST PASS\n");
-	}
-	
-
-// Check other player's hand/deck count were not changed
-
-	printf("----------------- Test: Hand/Deck Count of Opponent not Changed ----------------\n");
-
-
-	for (i = 1; i < numPlayers; i++) {
-		if (afterPlay.deckCount[i] != beforePlay.deckCount[i]) {
-			oneFail = -1;
-		}
-		if (afterPlay.handCount[i] != beforePlay.handCount[i]) {
-			twoFail = -1;
-		}
-	}
-	if (oneFail != -1) {
-		printf("TEST PASS\n");
-	}
-	
-	if (twoFail != -1) {
-		printf("TEST PASS\n");
-	}
-	
-	if (testPass == -1) {
-		printf("TEST PASS\n");
-	}
-
-
-
-	
-	
-// Test if adventurer works when there is only one Treasure to find
-
-	printf("----------------- Test: 1 Treasure Card in Deck ----------------\n"); 
-	
-// Init game with one treasure card in deck
-
-	initializeGame(numPlayers, k, randomSeed, &afterPlay);
-	afterPlay.hand[currentPlayer][handPos] = adventurer;
-
-	for (i = 1; i < afterPlay.deckCount[currentPlayer]; i++) {
-		afterPlay.deck[currentPlayer][i] = duchy;
-	}
-	
-	memcpy(&beforePlay, &afterPlay, sizeof(struct gameState));
-	
-
-// check cardEffect actually calls something
-	
-	if (cardEffect(adventurer, choice1, choice2, choice3, &afterPlay, handPos, &bonus) != 1) {
-		printf("TEST PASS\n");
-		testPass = -1;
-	}
-
-
-// Check currentPlayer handCount.
-
-// Should be +1 for treasure add , -1 for play of adventurer card
-
-printf("----------------- Test: Current Player Hand Count ----------------\n");
-	
-	if (afterPlay.handCount[currentPlayer] = beforePlay.handCount[currentPlayer]) {
-		printf("TEST PASS\n");
-		testPass = -1;
-	}
-	
-
-// Check that adventurer card added to played pile
-
-printf("----------------- Test: Adventurer Added to Played Card Pile After Play ----------------\n");
-
-	if  (afterPlay.playedCards[beforePlay.playedCardCount] = adventurer) {
-		printf("TEST PASS\n");
-		testPass = -1;
-	}
-
-
-// Test playedCardCount incremented by 1
-
-printf("----------------- Test: Number of Cards Played Incremented ----------------\n");
-
-
-	if  (afterPlay.playedCardCount = beforePlay.playedCardCount + 1) {
-		printf("TEST PASS\n");
-		testPass = -1;
-	}
-
-// Verify card added is treasure
-	
-printf("----------------- Test: Card Added is Treasure ----------------\n");
-
-	addedCard = afterPlay.hand[currentPlayer][afterPlay.handCount[currentPlayer]-1];
-	if ((addedCard = copper) || (addedCard = silver) || (addedCard = gold)) {
-		printf("TEST PASS\n");
-	}
-	
-
-// Check other player's hand/deck count were not changed
-
-	printf("----------------- Test: Hand/Deck Count of Opponent not Changed ----------------\n");
-
-
-	for (i = 1; i < numPlayers; i++) {
-		if (afterPlay.deckCount[i] != beforePlay.deckCount[i]) {
-			oneFail = -1;
-		}
-		if (afterPlay.handCount[i] != beforePlay.handCount[i]) {
-			twoFail = -1;
-		}
-	}
-	if (oneFail != -1) {
-		printf("TEST PASS\n");
-	}
-	
-	if (twoFail != -1) {
-		printf("TEST PASS\n");
-	}
-	
-	if (testPass != 0) {
-		printf("TEST PASS\n");
-	}
-
-
-	printf("\n >>>>> testPass: Testing complete %s <<<<<\n\n", TESTCARD);
-
-	return 0;
-
+return 0;
 }

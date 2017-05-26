@@ -18,7 +18,7 @@
 
 
 int main(){
-    int NUM_ITR = 5000;
+    int NUM_ITR = 50;
     struct gameState pre, post;
     int i, n, p, deckCount, discardCount, handCount, handP;
 
@@ -39,7 +39,8 @@ int main(){
     post.hand[p][handP] = smithy;   //because smithy requires it's hand position, make sure hand pos is used
 
     memcpy (&pre, &post, sizeof(struct gameState));
-    cardSmithy(&post, p, handP);
+	playSmithy( p, &post, handP);
+    //cardSmithy(&post, p, handP);
     //The following if/else block is taken directly from testDrawCard.c, and modified for the current card
     if (pre.deckCount[p] > 2) { //if there are 3 cards to draw
         pre.handCount[p] += 2;  //hand increases by 2, as smithy has been played
