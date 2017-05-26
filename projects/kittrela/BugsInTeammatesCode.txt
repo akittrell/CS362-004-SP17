@@ -1,0 +1,52 @@
+Title: Adventurer Card, when played, Will Inifintley Loop If 0 Treasure Cards are in deck+discard
+
+Class: Serious Bug
+
+Date: 5/26/17
+
+Reported By: Andrew Kittrell
+
+Reproducible: Yes
+
+Description
+==============
+When there are 0 treasure cards in the deck + discard piles, the adventurer card will continue to loop through the deck, reshuffling when it runs out of cards while it searches for the non-existent treasures. 
+
+Steps to Reproduce
+=================
+Set the game state such that no treasure cards exist in the discard and deck, and then play the adventurer card.
+
+Expected Results
+==============
+After no treasure is found after the first full deck search, stop searching, discard Adventurer card, and continue play.
+
+Actual Results
+============
+Infinite loop.
+----------------------------------------------------------------------------------------------------------------------------
+Title: Adventurer Card will Draw Only 1 Treasure, if 1 or more Treasure Cards Are in Deck + Discard
+
+Class: Serious Bug
+
+Date: 5/26/17
+
+Reported By: Andrew Kittrell
+
+Reproducible: Yes
+
+Description
+==============
+Playing the adventurer card with at least 1 treasure card in the deck + discard will cause the adventurer card to only pick up 1 treasure. The program stops searching after the first treasure is found. 
+
+Steps to Reproduce
+=================
+Set the game state such that 1 or more treasures are in the discard + deck (it doesn’t matter, as a shuffle will occur if there are none currently in the deck). Play the adventurer card. 
+
+Expected Results
+==============
+If there are a minimum of 2 treasures in the deck, I expect them to be drawn from the deck and placed into my hand.
+
+Actual Results
+============
+Only one treasure is placed in my hand.
+
